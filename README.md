@@ -56,7 +56,7 @@ Follow the steps below to run this project locally:
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/ERP-Inventory-Sales-Management-System.git
+git clone https://github.com/rahul9561/ERP-Inventory-Sales-Management-System.git
 
 # Navigate into the project
 cd ERP-Inventory-Sales-Management-System
