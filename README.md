@@ -1,71 +1,86 @@
-# ERP Inventory & Sales Management System  
+# ERP Inventory & Sales Management System
 
-An open-source **ERP Inventory & Sales Management System** built with **Django** and **Django REST Framework**.  
-This project provides an all-in-one solution for managing **Products, Customers, and Sales**, along with **User Authentication, Role-based Access, and APIs**.  
-
----
-
-## ✨ Features  
-
-✅ **Product Management** – Add, update, delete, and list products with stock tracking.  
-✅ **Customer Management** – Manage customer records with name, email, and phone.  
-✅ **Sales Management** – Track sales with product, quantity, total price, and date.  
-✅ **User Authentication** – Register, Login with **JWT Tokens**.  
-✅ **Role-based Access Control (RBAC)** – Admin, Manager, and Staff roles.  
-✅ **REST API** – CRUD APIs for products, customers, and sales.  
-✅ **Admin Dashboard** – Manage everything with Django Admin.  
-✅ **Open Source** – Free to use, extend, and customize.  
+A complete **ERP Inventory & Sales Management System** built with **Django + Django REST Framework**.  
+This project is designed to help businesses manage **Products, Customers, Sales, and User Roles (Admin, Manager, Staff)** efficiently with authentication powered by **JWT tokens**.
 
 ---
 
-## 🛠️ Tech Stack  
+## ✨ Features
 
-- **Backend:** Django, Django REST Framework  
-- **Database:** SQLite (default), supports PostgreSQL/MySQL  
-- **Authentication:** JWT (JSON Web Tokens)  
-- **Deployment Ready:** Gunicorn + Nginx (Linux)  
+- 🔐 **User Management (Authentication & Roles)**  
+  - JWT Authentication (Register, Login, Logout)  
+  - Role-based Access Control (Admin, Manager, Staff)  
 
----
+- 📦 **Product Management**  
+  - Add, Update, Delete, and List Products  
+  - Track product stock  
 
-## 📂 Project Structure  
+- 👥 **Customer Management**  
+  - Store and manage customer details  
+  - Name, Email, Phone  
 
+- 💰 **Sales Management**  
+  - Record sales with product, quantity, and total price  
+  - Auto stock deduction on sales  
+  - Sales history with dates  
 
-ERP-Inventory-Sales-Management-System/
-│── ERP_app/ # Main application (models, views, serializers, urls)
-│ ├── models.py # Product, Customer, Sales models
-│ ├── views.py # API Views (CRUD + Auth)
-│ ├── serializers.py # DRF serializers
-│ ├── urls.py # API routes
-│ ├── admin.py # Admin panel customization
-│── ERP_project/ # Django project configs (settings, urls, wsgi)
-│── manage.py # Django management script
-│── requirements.txt # Dependencies
-│── README.md # Project documentation
-
-
+- 🛠️ **API Endpoints (CRUD)**  
+  - Fully RESTful APIs for **Products, Customers, Sales**  
 
 ---
 
-## 🚀 Installation & Setup  
+## 📸 Screenshots
 
-### 1️⃣ Clone the Repository  
+👉 Add screenshots of your project here. Example:
+
+- **Admin Dashboard**  
+  ![Admin Dashboard](screenshots/admin_dashboard.png)
+
+- **Product List**  
+  ![Product List](screenshots/product_list.png)
+
+- **Sales API Example**  
+  ![Sales API](screenshots/sales_api.png)
+
+
+
+## 📜 License
+This project is licensed under the MIT License – see the [LICENSE](./LICENSE) file for details.
+
+
+---
+
+## ⚙️ Installation & Setup
+
+Follow the steps below to run this project locally:
+
 ```bash
+# Clone the repository
+git clone https://github.com/your-username/ERP-Inventory-Sales-Management-System.git
 
-git clone https://github.com/rahul9561/ERP-Inventory-Sales-Management-System.git
+# Navigate into the project
 cd ERP-Inventory-Sales-Management-System
 
-
-2️⃣ Create Virtual Environment & Install Dependencies
+# Create virtual environment
 python -m venv venv
-source venv/bin/activate   # On Windows: venv\Scripts\activate
+
+# Activate virtual environment
+# On Windows:
+venv\Scripts\activate
+# On Mac/Linux:
+source venv/bin/activate
+
+# Install dependencies
 pip install -r requirements.txt
 
-
-3️⃣ Run Migrations
+# Run migrations
 python manage.py makemigrations
 python manage.py migrate
 
-4️⃣ Create Superuser
+# Create superuser
 python manage.py createsuperuser
 
-Server will start at: http://127.0.0.1:8000/
+# Run server
+python manage.py runserver
+```
+Now open http://127.0.0.1:8000/  in your browser 🚀
