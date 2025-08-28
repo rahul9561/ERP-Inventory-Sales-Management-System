@@ -1,7 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, Product, Customer, Sale
-
+from .models import *
 
 
 
@@ -56,3 +55,14 @@ class SaleAdmin(admin.ModelAdmin):
 
 # ✅ Register Custom User
 admin.site.register(User, CustomUserAdmin)
+admin.site.register(Profile)
+
+@admin.register(Chart)
+class ChartAdmin(admin.ModelAdmin):
+    list_display = ('title', 'chart_type', 'value', 'created_at')
+    readonly_fields = ('value', 'created_at')  # value auto-calculated
+
+
+# invoice
+admin.site.register(Invoice)
+admin.site.register(InvoiceItem)
