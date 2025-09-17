@@ -33,6 +33,9 @@ jobs:
           python ERP/manage.py makemigrations --noinput
           python ERP/manage.py migrate --noinput
 
+      # Collect static files
+      - name: Collect Static Files
+        run: python ERP/manage.py collectstatic --noinput
 
       # Run tests
       - name: Run Tests
