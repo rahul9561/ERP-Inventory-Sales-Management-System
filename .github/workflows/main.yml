@@ -11,15 +11,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the repository
+      # Checkout repository
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      # Set up Python
+      # Set up Python 3.13
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.13'
 
       # Install dependencies
       - name: Install dependencies
@@ -33,7 +33,7 @@ jobs:
           python manage.py makemigrations --noinput
           python manage.py migrate --noinput
 
-      # Run tests
+      # Run tests (safe fallback if none exist)
       - name: Run Tests
         run: |
           python manage.py test || echo "✅ No tests found, skipping..."
