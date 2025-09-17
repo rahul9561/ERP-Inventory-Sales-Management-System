@@ -25,15 +25,17 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r ERP/requirements.txt
 
       # Run migrations
       - name: Run Migrations
+        working-directory: ERP
         run: |
           python manage.py makemigrations --noinput
           python manage.py migrate --noinput
 
       # Run tests (safe fallback if none exist)
       - name: Run Tests
+        working-directory: ERP
         run: |
           python manage.py test || echo "✅ No tests found, skipping..."
