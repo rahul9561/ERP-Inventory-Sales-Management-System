@@ -136,28 +136,41 @@ class Chart(models.Model):
 
 
 
+from django.db import models
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from django.db.models.manager import RelatedManager
+
 
 class Invoice(models.Model):
-    customer = models.ForeignKey("Customer", on_delete=models.CASCADE, related_name="invoices")
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    due_date = models.DateField(null=True, blank=True)
-    total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    customer_name = models.CharField(max_length=255)
+    customer_email = models.EmailField()
+    customer_address = models.TextField()
+    invoice_date = models.DateField(auto_now_add=True)
+    due_date = models.DateField()
+    # 👇 This is only for type checking, won't affect database
+    items: "RelatedManager[InvoiceItem]"
     status = models.CharField(
         max_length=20,
-        choices=[("draft", "Draft"), ("paid", "Paid"), ("unpaid", "Unpaid"), ("cancelled", "Cancelled")],
-        default="draft"
+        choices=[
+            ('draft', 'Draft'),
+            ('sent', 'Sent'),
+            ('paid', 'Paid'),
+            ('cancelled', 'Cancelled'),
+        ],
+        default='draft'
     )
+    total = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
-    def __str__(self):
-        return f"Invoice #{self.id} - {self.customer.name}"
-    
 
 class InvoiceItem(models.Model):
-    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name="items")
-    product = models.ForeignKey("Product", on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField()
-    price = models.DecimalField(max_digits=12, decimal_places=2)
+    invoice = models.ForeignKey(Invoice, related_name="items", on_delete=models.CASCADE)
+    product = models.CharField(max_length=255)
+    quantity = models.IntegerField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    tax = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
+    @property
     def line_total(self):
-        return self.quantity * self.price
+        return (self.quantity * self.price) + self.tax

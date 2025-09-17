@@ -1,6 +1,7 @@
 # ERP/ERP_app/views.py
 from rest_framework import generics, permissions ,response , status
 from rest_framework.views import APIView
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
@@ -98,10 +99,88 @@ class ChartViewSet(viewsets.ModelViewSet):
     
 
 
-class InvoiceViewSet(viewsets.ModelViewSet):
-    queryset = Invoice.objects.all().order_by("-created_at")
-    serializer_class = InvoiceSerializer
-    permission_classes = [IsAuthenticated & (IsAdmin | IsManager)]  # Only Admin/Manager
 
-    def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
+class CustomerViewSet(viewsets.ModelViewSet):
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
+
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+
+
+
+from django.http import FileResponse
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework import status
+import tempfile, os
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import mm
+
+class InvoiceViewSet(viewsets.ModelViewSet):
+    queryset = Invoice.objects.all()
+    serializer_class = InvoiceSerializer
+
+    @action(detail=True, methods=['get'])
+    def generate_pdf(self, request, pk=None):
+        invoice = self.get_object()
+
+        # Make sure items exist
+        items = getattr(invoice, "items", None)
+        if not items:
+            return Response({"error": "No items found for invoice"}, status=400)
+
+        # Create temporary PDF
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmpfile:
+            pdf_path = tmpfile.name
+
+        c = canvas.Canvas(pdf_path, pagesize=A4)
+        width, height = A4
+
+        # Title
+        c.setFont("Helvetica-Bold", 16)
+        c.drawString(30*mm, height - 30*mm, f"Invoice #{invoice.id}")
+
+        # Customer info
+        c.setFont("Helvetica", 12)
+        c.drawString(30*mm, height - 40*mm, f"Customer: {getattr(invoice, 'customer_name', 'N/A')}")
+        c.drawString(30*mm, height - 50*mm, f"Date: {getattr(invoice, 'date', '')}")
+
+        # Table header
+        c.setFont("Helvetica-Bold", 12)
+        y = height - 70*mm
+        c.drawString(30*mm, y, "Item")
+        c.drawString(100*mm, y, "Qty")
+        c.drawString(120*mm, y, "Price")
+        c.drawString(150*mm, y, "Total")
+
+        # Table rows
+        c.setFont("Helvetica", 11)
+        y -= 10*mm
+        total = 0
+        for item in invoice.items.all():
+            line_total = item.quantity * item.price
+            total += line_total
+            c.drawString(30*mm, y, str(item.product))
+            c.drawString(100*mm, y, str(item.quantity))
+            c.drawString(120*mm, y, f"{item.price:.2f}")
+            c.drawString(150*mm, y, f"{line_total:.2f}")
+            y -= 10*mm
+
+        # Grand total
+        c.setFont("Helvetica-Bold", 12)
+        c.drawString(120*mm, y - 10*mm, "Total:")
+        c.drawString(150*mm, y - 10*mm, f"{total:.2f}")
+
+        c.showPage()
+        c.save()
+
+        return FileResponse(
+            open(pdf_path, "rb"),
+            content_type="application/pdf",
+            as_attachment=True,
+            filename=f"invoice_{pk}.pdf"
+        )

@@ -113,28 +113,70 @@ class ChartSerializer(serializers.ModelSerializer):
 
 
 
+# Serializers
+# Serializers
+class CustomerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Customer
+        fields = ['id', 'name', 'email', 'phone']
+
+class ProductSerializer(serializers.ModelSerializer):
+    is_low_stock = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Product
+        fields = ['id', 'name', 'category', 'price', 'stock', 'is_low_stock']
+
 class InvoiceItemSerializer(serializers.ModelSerializer):
+    line_total = serializers.ReadOnlyField()
+
     class Meta:
         model = InvoiceItem
-        fields = ["id", "product", "quantity", "price", "line_total"]
-        read_only_fields = ["line_total"]
+        fields = ['id', 'product', 'quantity', 'price', 'tax', 'line_total']
 
 class InvoiceSerializer(serializers.ModelSerializer):
     items = InvoiceItemSerializer(many=True)
+    total = serializers.ReadOnlyField()
 
     class Meta:
         model = Invoice
-        fields = ["id", "customer", "created_by", "created_at", "due_date", "status", "total_amount", "items"]
-        read_only_fields = ["created_by", "created_at", "total_amount"]
+        fields = ['id', 'customer_name', 'customer_email', 'customer_address', 
+                 'invoice_date', 'due_date', 'status', 'total', 'items']
 
     def create(self, validated_data):
-        items_data = validated_data.pop("items")
+        items_data = validated_data.pop('items')
         invoice = Invoice.objects.create(**validated_data)
+        for item_data in items_data:
+            InvoiceItem.objects.create(invoice=invoice, **item_data)
+        invoice.total = sum(item.line_total for item in invoice.items.all())
+        invoice.save()
+        return invoice
 
-        for item in items_data:
-            InvoiceItem.objects.create(invoice=invoice, **item)
-
-        # Recalculate total
-        invoice.total_amount = sum(i["quantity"] * i["price"] for i in items_data)
+    def update(self, validated_data):
+        items_data = validated_data.pop('items')
+        invoice = self.instance
+        for attr, value in validated_data.items():
+            setattr(invoice, attr, value)
+        invoice.save()
+        
+        # Update or create items
+        existing_item_ids = set(invoice.items.values_list('id', flat=True))
+        submitted_item_ids = set(item.get('id', None) for item in items_data if item.get('id'))
+        
+        # Delete items not in the update
+        invoice.items.exclude(id__in=submitted_item_ids).delete()
+        
+        # Update or create items
+        for item_data in items_data:
+            item_id = item_data.get('id')
+            if item_id:
+                item = invoice.items.get(id=item_id)
+                for attr, value in item_data.items():
+                    setattr(item, attr, value)
+                item.save()
+            else:
+                InvoiceItem.objects.create(invoice=invoice, **item_data)
+                
+        invoice.total = sum(item.line_total for item in invoice.items.all())
         invoice.save()
         return invoice
