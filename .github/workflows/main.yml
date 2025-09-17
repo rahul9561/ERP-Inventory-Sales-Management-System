@@ -1,10 +1,12 @@
-name: Django CI
+name: Django CI/CD
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main        # Runs on any push to main
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main        # Runs on PRs to main
 
 jobs:
   build:
@@ -19,7 +21,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.13'
+          python-version: '3.11'
 
       # Install dependencies
       - name: Install dependencies
